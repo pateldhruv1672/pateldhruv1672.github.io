@@ -24,8 +24,8 @@
   const gridIds = ['eval', 'photos', 'degree', 'pinecone', 'avian'];
 
   const mediaBadge = project => project.videos?.length
-    ? '<span class="media-badge"><span>▶</span> Video + story</span>'
-    : '<span class="media-badge text-only">Story</span>';
+    ? '<span class="media-badge"><span>▶</span> Video + write-up</span>'
+    : '<span class="media-badge text-only">Write-up</span>';
 
   const featured = qs('#featured-work');
   if (featured) {
@@ -43,7 +43,7 @@
             <p>${project.short}</p>
             <div class="project-meta"><span>${project.role}</span><span>${project.year}</span></div>
           </div>
-          <span class="project-action">Read the project story <span>↗</span></span>
+          <span class="project-action">Open project <span>↗</span></span>
         </div>
       </a>`;
     }).join('');
@@ -62,7 +62,7 @@
           <p class="card-category">${project.category}</p>
           <h3>${project.title}</h3>
           <p>${project.short}</p>
-          <div class="card-footer"><span>${project.year}</span><span>Read story ↗</span></div>
+          <div class="card-footer"><span>${project.year}</span><span>Open project ↗</span></div>
         </div>
       </a>`;
     }).join('');
