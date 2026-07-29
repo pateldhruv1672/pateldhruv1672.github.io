@@ -1,0 +1,119 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img" aria-labelledby="title desc">
+  <title id="title">Sparky Go2 teach, resume, agent, and voice architecture</title>
+  <desc id="desc">A layered architecture diagram showing robot sensors and transport, base ROS 2 topics, teach and resume modes, semantic memory, agentic supervision, Nav2 execution, and voice safety gates.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0b0d10"/>
+      <stop offset="1" stop-color="#15191e"/>
+    </linearGradient>
+    <linearGradient id="green" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#8dff47"/>
+      <stop offset="1" stop-color="#4dd4a7"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="14" stdDeviation="18" flood-color="#000" flood-opacity="0.35"/>
+    </filter>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L10,5 L0,10 z" fill="#71808e"/>
+    </marker>
+    <style>
+      .title{font:700 42px -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;fill:#f6f7f8}
+      .sub{font:400 21px -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;fill:#98a2ad}
+      .layer{font:700 16px -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;fill:#8dff47;letter-spacing:2px}
+      .box{fill:#171b20;stroke:#303740;stroke-width:2;rx:24;filter:url(#shadow)}
+      .box2{fill:#101418;stroke:#3c4650;stroke-width:2;rx:20}
+      .h{font:700 23px -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;fill:#f6f7f8}
+      .p{font:400 17px -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;fill:#aab3bc}
+      .small{font:600 15px ui-monospace,SFMono-Regular,Menlo,monospace;fill:#b9c2ca}
+      .accent{fill:url(#green)}
+      .flow{stroke:#71808e;stroke-width:3;fill:none;marker-end:url(#arrow)}
+      .flow2{stroke:#8dff47;stroke-width:3;fill:none;marker-end:url(#arrow)}
+      .gate{fill:#18311e;stroke:#66d76a;stroke-width:2;rx:17}
+    </style>
+  </defs>
+  <rect width="1600" height="900" fill="url(#bg)"/>
+  <circle cx="1460" cy="80" r="220" fill="#8dff47" opacity="0.035"/>
+  <circle cx="120" cy="820" r="260" fill="#4dd4a7" opacity="0.03"/>
+
+  <text x="86" y="80" class="title">Sparky autonomy stack</text>
+  <text x="86" y="117" class="sub">One robot contract, separate teach/resume ownership, typed tools, and explicit safety gates.</text>
+
+  <text x="86" y="175" class="layer">01 · ROBOT + TRANSPORT</text>
+  <rect x="86" y="198" width="300" height="126" class="box"/>
+  <rect x="111" y="221" width="10" height="80" class="accent" rx="5"/>
+  <text x="145" y="245" class="h">Unitree Go2</text>
+  <text x="145" y="275" class="p">WebRTC bring-up · CycloneDDS</text>
+  <text x="145" y="301" class="small">LiDAR · camera · IMU · odom · TF</text>
+
+  <rect x="442" y="198" width="404" height="126" class="box"/>
+  <text x="471" y="245" class="h">Base ROS 2 contract</text>
+  <text x="471" y="275" class="small">/scan · /camera/image_raw · /odom</text>
+  <text x="471" y="301" class="small">/tf · /tf_static · /cmd_vel_out</text>
+  <path d="M386 261 H432" class="flow"/>
+
+  <text x="86" y="385" class="layer">02 · STATE OWNERSHIP</text>
+  <rect x="86" y="407" width="360" height="174" class="box"/>
+  <text x="116" y="449" class="h">Teach mode</text>
+  <text x="116" y="480" class="p">Single SLAM owner builds the map</text>
+  <text x="116" y="507" class="p">and records named places.</text>
+  <rect x="116" y="530" width="300" height="32" class="box2"/>
+  <text x="133" y="552" class="small">map.yaml · map.pgm · places.yaml</text>
+
+  <rect x="500" y="407" width="360" height="174" class="box"/>
+  <text x="530" y="449" class="h">Resume mode</text>
+  <text x="530" y="480" class="p">Map server + AMCL own localization.</text>
+  <text x="530" y="507" class="p">Nav2 starts after TF becomes valid.</text>
+  <rect x="530" y="530" width="300" height="32" class="box2"/>
+  <text x="547" y="552" class="small">session.yaml · spawn · semantic map</text>
+
+  <path d="M266 324 V397" class="flow2"/>
+  <path d="M645 324 V397" class="flow2"/>
+  <path d="M446 494 H490" class="flow"/>
+
+  <text x="930" y="175" class="layer">03 · SEMANTIC + AGENT LAYERS</text>
+  <rect x="930" y="198" width="584" height="383" class="box"/>
+  <rect x="962" y="228" width="246" height="100" class="box2"/>
+  <text x="986" y="264" class="h">Memory + perception</text>
+  <text x="986" y="294" class="p">Places, observations, VLM checkpoints</text>
+
+  <rect x="1234" y="228" width="246" height="100" class="box2"/>
+  <text x="1258" y="264" class="h">Agent supervisor</text>
+  <text x="1258" y="294" class="p">Observe, plan, recover, report</text>
+
+  <rect x="962" y="362" width="246" height="100" class="box2"/>
+  <text x="986" y="398" class="h">Typed Nav2 tools</text>
+  <text x="986" y="428" class="p">Preconditions, timeout, feedback</text>
+
+  <rect x="1234" y="362" width="246" height="100" class="box2"/>
+  <text x="1258" y="398" class="h">Omi voice router</text>
+  <text x="1258" y="428" class="p">Transcript, confirmation, tour intent</text>
+
+  <rect x="1098" y="495" width="246" height="58" class="gate"/>
+  <text x="1134" y="530" class="h" font-size="20">Safety gate</text>
+
+  <path d="M1208 278 H1224" class="flow"/>
+  <path d="M1357 328 V352" class="flow"/>
+  <path d="M1234 412 H1218" class="flow"/>
+  <path d="M1357 462 V485 H1344" class="flow2"/>
+  <path d="M1085 462 V485 H1098" class="flow2"/>
+
+  <text x="86" y="653" class="layer">04 · EXECUTION + OBSERVABILITY</text>
+  <rect x="86" y="676" width="344" height="142" class="box"/>
+  <text x="116" y="719" class="h">Nav2 execution</text>
+  <text x="116" y="750" class="p">Planner · controller · recoveries</text>
+  <text x="116" y="779" class="small">NavigateToPose · collision monitor</text>
+
+  <rect x="480" y="676" width="344" height="142" class="box"/>
+  <text x="510" y="719" class="h">Robot command path</text>
+  <text x="510" y="750" class="p">Only validated motion reaches Go2.</text>
+  <text x="510" y="779" class="small">Nav2 → /cmd_vel_out → driver</text>
+
+  <rect x="874" y="676" width="640" height="142" class="box"/>
+  <text x="904" y="719" class="h">Evidence and debugging</text>
+  <text x="904" y="750" class="p">RViz, lifecycle state, action feedback, topic freshness, TF ownership,</text>
+  <text x="904" y="779" class="p">agent streams, voice verification state, and clean-restart scripts.</text>
+
+  <path d="M1221 553 V620 H258 V666" class="flow2"/>
+  <path d="M430 747 H470" class="flow2"/>
+  <path d="M824 747 H864" class="flow"/>
+</svg>
