@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000">
+<defs>
+ <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#f7fbff"/><stop offset="1" stop-color="#dff4ec"/></linearGradient>
+ <linearGradient id="arc" x1="0" x2="1"><stop stop-color="#0891b2"/><stop offset="1" stop-color="#f59e0b"/></linearGradient>
+ <filter id="shadow"><feDropShadow dx="0" dy="24" stdDeviation="26" flood-opacity=".16"/></filter>
+</defs>
+<rect width="1600" height="1000" rx="64" fill="url(#bg)"/>
+<g filter="url(#shadow)">
+ <rect x="100" y="95" width="1400" height="810" rx="38" fill="#ffffff"/>
+ <rect x="140" y="135" width="850" height="520" rx="28" fill="#eef7f6"/>
+ <rect x="1030" y="135" width="430" height="240" rx="28" fill="#0f172a"/>
+ <rect x="1030" y="415" width="430" height="240" rx="28" fill="#f1f5f9"/>
+ <rect x="140" y="695" width="1320" height="170" rx="28" fill="#f8fafc"/>
+</g>
+<g opacity=".35" fill="#94a3b8">
+ <path d="M230 250l125-82 110 35 55-50 93 34 85-14 105 46 92-11 60 68-35 57-100 23-82-10-90 45-105-28-71 26-118-47z"/>
+ <path d="M580 430l91-44 92 18 45-40 73 39 62 17-9 77-88 32-81-23-75 40-98-31z"/>
+</g>
+<g fill="none" stroke="url(#arc)" stroke-width="10" stroke-linecap="round">
+ <path d="M250 485C420 155 680 170 920 335"/>
+ <path d="M310 540C530 320 680 540 900 250"/>
+ <path d="M220 350C460 520 660 200 920 470"/>
+</g>
+<g fill="#0e7490"><circle cx="250" cy="485" r="13"/><circle cx="310" cy="540" r="13"/><circle cx="220" cy="350" r="13"/></g><g fill="#f59e0b"><circle cx="920" cy="335" r="13"/><circle cx="900" cy="250" r="13"/><circle cx="920" cy="470" r="13"/></g>
+<g transform="translate(1070 185)"><path d="M0 130C60 75 110 118 170 58s122 12 210-10" fill="none" stroke="#38bdf8" stroke-width="12"/><path d="M0 165h350" stroke="#334155"/><g fill="#e2e8f0"><rect y="8" width="130" height="15" rx="7"/><rect y="35" width="210" height="10" rx="5"/></g></g>
+<g transform="translate(1070 470)"><rect width="80" height="130" rx="14" fill="#0891b2"/><rect x="105" y="50" width="80" height="80" rx="14" fill="#22c55e"/><rect x="210" y="22" width="80" height="108" rx="14" fill="#f59e0b"/><rect x="315" y="72" width="80" height="58" rx="14" fill="#a78bfa"/></g>
+<g transform="translate(185 735)"><path d="M0 88C110 15 210 100 330 40s230 80 350 8 240 20 360-20 210 34 330-12" fill="none" stroke="#0f766e" stroke-width="9"/><path d="M0 112h1190" stroke="#cbd5e1" stroke-width="2"/></g>
+</svg>

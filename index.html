@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Dhruv Patel is a robotics researcher and AI systems engineer building robot learning, semantic navigation, digital twins, and production ML systems." />
+  <meta name="theme-color" content="#f5f5f7" />
+  <meta property="og:title" content="Dhruv Patel — Robotics & AI" />
+  <meta property="og:description" content="Research, engineering, and selected work across embodied AI, autonomous robots, and production machine learning." />
+  <meta property="og:type" content="website" />
+  <title>Dhruv Patel — Robotics & AI</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="styles.css" />
+  <script src="project-data.js" defer></script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="site-header">
+    <div class="shell nav-wrap">
+      <a class="wordmark" href="#top" aria-label="Dhruv Patel home">Dhruv Patel</a>
+      <nav class="nav-links" aria-label="Primary navigation">
+        <a href="#work">Work</a>
+        <a href="#experience">Experience</a>
+        <a href="#about">About</a>
+      </nav>
+      <div class="nav-actions">
+        <a href="https://github.com/pateldhruv1672" target="_blank" rel="noreferrer">GitHub</a>
+        <a class="nav-button" href="assets/docs/Dhruv_Patel_Resume.pdf" target="_blank">Résumé</a>
+      </div>
+      <button class="menu-toggle" aria-label="Open navigation" aria-expanded="false"><span></span><span></span></button>
+    </div>
+    <div class="mobile-nav" aria-hidden="true">
+      <a href="#work">Work</a><a href="#experience">Experience</a><a href="#about">About</a>
+      <a href="https://github.com/pateldhruv1672" target="_blank" rel="noreferrer">GitHub</a>
+      <a href="assets/docs/Dhruv_Patel_Resume.pdf" target="_blank">Résumé</a>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="hero shell" id="top">
+      <div class="hero-copy reveal">
+        <p class="availability"><span></span> Research Assistant at SJSU's Robotics & Digital Twin Lab</p>
+        <h1>Hi, I’m Dhruv.</h1>
+        <p class="hero-statement">I build robots and AI systems that move from impressive demos to reliable real-world behavior.</p>
+        <p class="hero-detail">My work spans robot learning, semantic navigation, digital twins, agent evaluation, and production ML. I’m currently pursuing an M.S. in Applied Data Science at San José State University.</p>
+        <div class="hero-links">
+          <a class="primary-link" href="#work">View selected work <span>↓</span></a>
+          <a class="secondary-link" href="mailto:pateldhruv1672@gmail.com">pateldhruv1672@gmail.com <span>↗</span></a>
+        </div>
+        <div class="hero-meta" aria-label="Professional summary">
+          <span>Ex-Bain</span><span>Ex-Samsung Research</span><span>President, Applied Intelligent Systems</span><span>GPA 3.8/4.0</span>
+        </div>
+      </div>
+      <figure class="hero-portrait reveal delay-1">
+        <picture>
+          <source srcset="assets/images/dhruv-intro.webp" type="image/webp" />
+          <img src="assets/images/dhruv-intro.jpg" alt="Dhruv Patel working on a laptop" />
+        </picture>
+        <figcaption>Research, robotics, and applied AI · San José</figcaption>
+      </figure>
+    </section>
+
+    <section class="work-section" id="work">
+      <div class="shell section-intro reveal">
+        <p class="section-kicker">Selected work</p>
+        <h2>Selected systems and experiments.</h2>
+        <p>I selected projects that show the full engineering arc: sensing, data, models, orchestration, failure recovery, and the product or research outcome.</p>
+      </div>
+
+      <div class="shell featured-work" id="featured-work"></div>
+
+      <div class="shell project-grid" id="project-grid"></div>
+
+      <div class="shell archive-section reveal">
+        <div class="archive-heading">
+          <p class="section-kicker">Project archive</p>
+          <h2>Additional software and AI systems.</h2>
+        </div>
+        <div class="archive-list" id="archive-list"></div>
+      </div>
+    </section>
+
+    <section class="experience-section" id="experience">
+      <div class="shell">
+        <div class="section-intro reveal">
+          <p class="section-kicker">Experience</p>
+          <h2>Research depth, production discipline.</h2>
+        </div>
+        <div class="experience-list">
+          <article class="experience-row reveal">
+            <div class="experience-date">2026 — Present</div>
+            <div class="experience-main">
+              <h3>Research Assistant</h3>
+              <p class="experience-org">Robotics & Digital Twin Lab · San José State University</p>
+              <p>Fine-tuning VLA policies for Unitree robots, building teleoperation data pipelines, developing persistent semantic navigation, and training RL policies across Isaac Sim, MuJoCo, Gazebo, and real hardware.</p>
+            </div>
+            <div class="experience-tags">VLA · ROS 2 · Nav2 · Isaac Sim · SLURM</div>
+          </article>
+          <article class="experience-row reveal">
+            <div class="experience-date">2024 — 2025</div>
+            <div class="experience-main">
+              <h3>Software Engineer II</h3>
+              <p class="experience-org">Bain & Company · New Delhi</p>
+              <p>Built hybrid dense+sparse RAG and semantic caching across 12 workflows, reducing LLM API cost by 35% and latency by 220ms. Developed a TensorFlow GNN ledger classifier tracked with MLflow.</p>
+            </div>
+            <div class="experience-tags">RAG · Elasticsearch · TensorFlow GNN · MLflow</div>
+          </article>
+          <article class="experience-row reveal">
+            <div class="experience-date">2021 — 2024</div>
+            <div class="experience-main">
+              <h3>Software Engineer</h3>
+              <p class="experience-org">Samsung R&D Institute India · Bengaluru</p>
+              <p>Built data and ML workflows, Java/Spring microservices, Kafka-based processing, and analytics systems for high-volume product data.</p>
+            </div>
+            <div class="experience-tags">Java · Spring Boot · Kafka · PySpark · AWS</div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="about-section" id="about">
+      <div class="shell about-grid">
+        <figure class="about-photo reveal">
+          <img src="assets/images/dhruv-working.webp" alt="Dhruv Patel working at a workstation in the SJSU Robotics and Digital Twin Lab" />
+        </figure>
+        <div class="about-copy reveal delay-1">
+          <p class="section-kicker">About</p>
+          <h2>I like hard systems where software meets the physical world.</h2>
+          <p>I’m Dhruv Patel, a robotics researcher and AI systems engineer. At SJSU’s Robotics & Digital Twin Lab, I work directly with Unitree and xArm hardware, from collecting demonstrations and debugging TF trees to training policies and validating them on robots.</p>
+          <p>Before graduate school, I built production AI and distributed data systems at Bain & Company and Samsung Research. That background shapes how I approach robotics: observability, reproducibility, clear interfaces, and recovery behavior matter as much as model quality.</p>
+          <div class="about-facts">
+            <div><strong>M.S. Applied Data Science</strong><span>San José State University · 3.8/4.0</span></div>
+            <div><strong>President</strong><span>Applied Intelligent Systems</span></div>
+            <div><strong>Focus</strong><span>Embodied AI · Robot autonomy · 3D perception</span></div>
+          </div>
+          <div class="about-links">
+            <a href="https://www.linkedin.com/in/dhruvpatel16" target="_blank" rel="noreferrer">LinkedIn ↗</a>
+            <a href="https://github.com/pateldhruv1672" target="_blank" rel="noreferrer">GitHub ↗</a>
+            <a href="assets/docs/Dhruv_Patel_Resume.pdf" target="_blank">Résumé ↗</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="contact-section">
+      <div class="shell contact-inner reveal">
+        <p class="section-kicker">Contact</p>
+        <h2>Let’s build something that has to work outside a notebook.</h2>
+        <a href="mailto:pateldhruv1672@gmail.com">pateldhruv1672@gmail.com <span>↗</span></a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer shell">
+    <span>© 2026 Dhruv Patel</span>
+    <span>Robotics · AI systems · San José</span>
+  </footer>
+</body>
+</html>
