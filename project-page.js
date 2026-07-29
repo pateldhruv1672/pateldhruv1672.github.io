@@ -54,9 +54,9 @@
   const demoHTML = p.videos?.length ? `
     <section class="blog-section demo-section reveal" id="demo">
       <p class="blog-section-label">Media</p>
-      <h2>Reviewed project footage.</h2>
+      <h2>Video demos.</h2>
       <div class="section-prose">
-        <p>These are locally hosted, compressed highlights selected from the uploaded source recordings. Each clip is mapped only to the subsystem it actually shows, preserves the full frame, and can be opened directly in the browser.</p>
+        <p>These clips come from the project recordings and are compressed for the web. Go2 clips keep the original audio. Use the player controls for sound, playback speed, and fullscreen.</p>
       </div>
       <div class="demo-grid">
         ${p.videos.map((video, index) => `
@@ -64,18 +64,18 @@
             <span class="demo-card-visual" style="view-transition-name: project-media-${escapeHTML(activeId)}-${index}">
               <img src="${escapeHTML(video.poster || p.image)}" alt="${escapeHTML(video.label)} preview" loading="lazy" />
               <span class="play-disc" aria-hidden="true">▶</span>
-              ${video.duration ? `<span class="clip-duration">${escapeHTML(video.duration)}</span>` : ''}
+              ${video.duration ? `<span class="clip-duration">${escapeHTML(video.duration)}</span>` : ''}${video.hasAudio ? '<span class="sound-badge">Sound</span>' : ''}
             </span>
             <span class="demo-card-copy">
               <strong>${escapeHTML(video.label)}</strong>
-              <small>${escapeHTML(video.caption || 'Curated project highlight')}</small>
+              <small>${escapeHTML(video.caption || 'Project demo')}</small>
             </span>
           </button>`).join('')}
       </div>
     </section>` : '';
 
   const sourceLinks = [
-    p.github ? `<a href="${escapeHTML(p.github)}" target="_blank" rel="noreferrer">Source repository <span>GitHub ↗</span></a>` : '',
+    p.github ? `<a href="${escapeHTML(p.github)}" target="_blank" rel="noreferrer">Repository <span>GitHub ↗</span></a>` : '',
     ...(p.videos || []).map(video => `<a href="${escapeHTML(video.src)}" target="_blank" rel="noreferrer">${escapeHTML(video.label)} <span>Open MP4 ↗</span></a>`)
   ].filter(Boolean).join('');
 
@@ -83,22 +83,22 @@
   const githubLabel = p.github ? 'GitHub repository' : 'GitHub profile';
   const externalLinks = [
     `<a href="${escapeHTML(githubHref)}" target="_blank" rel="noreferrer">${githubLabel} <span>↗</span></a>`,
-    firstVideo ? `<button type="button" class="text-button js-open-video" data-video-index="0">Play reviewed clip <span>▶</span></button>` : ''
+    firstVideo ? `<button type="button" class="text-button js-open-video" data-video-index="0">Play first demo <span>▶</span></button>` : ''
   ].filter(Boolean).join('');
 
   const heroActions = [
     `<a class="blog-action blog-action-primary" href="${escapeHTML(githubHref)}" target="_blank" rel="noreferrer"><span>${p.github ? 'View GitHub repository' : 'View GitHub profile'}</span><strong>↗</strong></a>`,
-    firstVideo ? `<button type="button" class="blog-action blog-action-secondary js-open-video" data-video-index="0"><span>Watch video demo</span><strong>▶</strong></button>` : ''
+    firstVideo ? `<button type="button" class="blog-action blog-action-secondary js-open-video" data-video-index="0"><span>Watch demo</span><strong>▶</strong></button>` : ''
   ].filter(Boolean).join('');
 
   const featureVisual = firstVideo
     ? `<button type="button" class="evidence-feature js-open-video" data-video-index="0" aria-label="Play ${escapeHTML(firstVideo.label)}">
         <img src="${escapeHTML(firstVideo.poster || p.image)}" alt="${escapeHTML(firstVideo.label)} preview" />
-        <span class="evidence-feature-overlay"><span class="play-disc">▶</span><span><strong>${escapeHTML(firstVideo.label)}</strong><small>${escapeHTML(firstVideo.duration || 'Video demo')}</small></span></span>
+        <span class="evidence-feature-overlay"><span class="play-disc">▶</span><span><strong>${escapeHTML(firstVideo.label)}</strong><small>${escapeHTML(firstVideo.duration || 'Video')}${firstVideo.hasAudio ? ' · sound' : ''}</small></span></span>
       </button>`
     : `<button type="button" class="evidence-feature js-open-image" data-image-index="0" aria-label="Open ${escapeHTML(gallery[0].caption || gallery[0].alt)}">
         <img src="${escapeHTML(gallery[0].src)}" alt="${escapeHTML(gallery[0].alt)}" />
-        <span class="evidence-feature-overlay image-only"><span><strong>${escapeHTML(gallery[0].caption || 'Project evidence')}</strong><small>Open full size ↗</small></span></span>
+        <span class="evidence-feature-overlay image-only"><span><strong>${escapeHTML(gallery[0].caption || 'Project image')}</strong><small>Open full size ↗</small></span></span>
       </button>`;
 
   const illustrationClass = (isIllustration(p.image) || p.coverFit === 'contain') ? 'illustration-cover' : '';
@@ -130,20 +130,20 @@
 
       <figure class="blog-cover ${illustrationClass} page-enter delay-2" style="view-transition-name: project-media-${escapeHTML(activeId)}">
         <img src="${escapeHTML(p.image)}" alt="${escapeHTML(p.title)} project visual" />
-        ${firstVideo ? `<button type="button" class="cover-play js-open-video" data-video-index="0"><span class="play-disc">▶</span><span>Play reviewed highlight</span></button>` : ''}
+        ${firstVideo ? `<button type="button" class="cover-play js-open-video" data-video-index="0"><span class="play-disc">▶</span><span>Play video</span></button>` : ''}
         <figcaption>${escapeHTML(p.title)} · ${escapeHTML(p.category)}</figcaption>
       </figure>
 
       <div class="article-shell shell">
         <aside class="article-rail">
           <div class="rail-inner">
-            <p class="rail-title">In this story</p>
+            <p class="rail-title">On this page</p>
             <nav aria-label="Article table of contents">
               <a href="#overview">Overview</a>
               ${(p.chapters || []).map((chapter, index) => `<a href="#chapter-${index + 1}">${escapeHTML(chapter.title)}</a>`).join('')}
-              <a href="#engineering">System architecture</a>
-              <a href="#impact">Outcome and impact</a>
-              ${p.videos?.length ? '<a href="#demo">Reviewed footage</a>' : ''}
+              <a href="#engineering">Architecture</a>
+              <a href="#impact">Results</a>
+              ${p.videos?.length ? '<a href="#demo">Video demos</a>' : ''}
             </nav>
             <div class="rail-stack">
               <p>Technical stack</p>
@@ -156,37 +156,38 @@
         <main class="article-copy">
           <p class="article-lead reveal">${escapeHTML(p.lead || p.problem)}</p>
 
-          <section class="article-inline-visuals reveal" aria-label="Project evidence">
+          <section class="article-inline-visuals reveal" aria-label="Project media">
             <div class="inline-visuals-heading">
-              <p>Project evidence</p>
-              <span>Actual lab images, dashboard pages, and reviewed recording frames.</span>
+              <p>Images and demos</p>
+              <span>Lab photos, project screenshots, and frames from the demo recordings.</span>
             </div>
             <div class="inline-visuals-grid">${visualCards(true)}</div>
           </section>
 
           <section class="blog-section reveal" id="overview">
             <p class="blog-section-label">01</p>
-            <h2>The problem worth solving.</h2>
+            <h2>Problem.</h2>
             <div class="section-prose"><p>${escapeHTML(p.problem)}</p></div>
           </section>
 
           ${chapterHTML}
 
-          <blockquote class="article-quote reveal">
+          <aside class="article-quote reveal">
+            <span>Key engineering choice</span>
             <p>${escapeHTML(p.unique)}</p>
-          </blockquote>
+          </aside>
 
           <section class="blog-section reveal" id="engineering">
             <p class="blog-section-label">Architecture</p>
-            <h2>How the system is put together.</h2>
+            <h2>Architecture.</h2>
             <ol class="architecture-list">
               ${p.system.map((item, index) => `<li><span>${String(index + 1).padStart(2, '0')}</span><p>${escapeHTML(item)}</p></li>`).join('')}
             </ol>
           </section>
 
           <section class="blog-section reveal" id="impact">
-            <p class="blog-section-label">Outcome</p>
-            <h2>What the work demonstrates.</h2>
+            <p class="blog-section-label">Results</p>
+            <h2>What I completed.</h2>
             <div class="impact-list">
               ${p.impact.map(item => `<div><span aria-hidden="true">↗</span><p>${escapeHTML(item)}</p></div>`).join('')}
             </div>
@@ -195,17 +196,17 @@
           ${demoHTML}
 
           <section class="blog-section source-section reveal">
-            <p class="blog-section-label">Explore</p>
-            <h2>Code and supporting material.</h2>
+            <p class="blog-section-label">Links</p>
+            <h2>Repository and files.</h2>
             <div class="source-links">${sourceLinks || '<p>Supporting code is currently part of a private research workspace.</p>'}</div>
           </section>
         </main>
 
-        <aside class="article-visuals" aria-label="Project evidence">
+        <aside class="article-visuals" aria-label="Project media">
           <div class="visual-rail-inner">
             <div class="visual-rail-heading">
-              <p>${firstVideo ? 'Demo & project evidence' : 'Project evidence'}</p>
-              <span>${firstVideo ? 'Play the reviewed clip, then inspect the supporting images.' : 'Click any image to inspect it full screen.'}</span>
+              <p>${firstVideo ? 'Demo and images' : 'Project images'}</p>
+              <span>${firstVideo ? 'Play the clip or open any image at full size.' : 'Open any image at full size.'}</span>
             </div>
             ${featureVisual}
             <div class="visual-rail-list">${visualCards(false)}</div>
@@ -215,7 +216,7 @@
 
       <div class="shell">
         <a class="project-next reveal" href="project.html?id=${encodeURIComponent(nextId)}" style="view-transition-name: next-project-card">
-          <div><p>Next story</p><h3>${escapeHTML(next.title)}</h3></div><span>→</span>
+          <div><p>Next project</p><h3>${escapeHTML(next.title)}</h3></div><span>→</span>
         </a>
       </div>
     </article>`;
@@ -228,14 +229,23 @@
   const openVideo = index => {
     const video = p.videos?.[Number(index)];
     if (!video || !videoModal || !modalStage) return;
-    modalStage.innerHTML = `<video controls autoplay playsinline preload="metadata" poster="${escapeHTML(video.poster || p.image)}"><source src="${escapeHTML(video.src)}" type="video/mp4">Your browser does not support HTML5 video.</video>`;
+    modalStage.innerHTML = `<video controls playsinline preload="metadata" poster="${escapeHTML(video.poster || p.image)}"><source src="${escapeHTML(video.src)}" type="video/mp4">Your browser does not support HTML5 video.</video>`;
+    const player = modalStage.querySelector('video');
+    if (player) {
+      player.defaultMuted = false;
+      player.muted = false;
+      player.volume = 1;
+    }
     if (modalTitle) modalTitle.textContent = video.label;
+    const modalEyebrow = videoModal.querySelector('.video-modal-eyebrow');
+    if (modalEyebrow) modalEyebrow.textContent = video.hasAudio ? 'Project video · original audio' : 'Project video';
     if (modalExternal) {
       modalExternal.href = video.src;
       modalExternal.textContent = 'Open MP4 ↗';
     }
     videoModal.showModal();
     document.body.classList.add('modal-open');
+    player?.play().catch(() => {});
   };
 
   document.addEventListener('click', event => {
