@@ -56,7 +56,7 @@
       <p class="blog-section-label">Media</p>
       <h2>Video demos.</h2>
       <div class="section-prose">
-        <p>These clips come from the project recordings and are compressed for the web. Go2 clips keep the original audio. Use the player controls for sound, playback speed, and fullscreen.</p>
+        <p>${escapeHTML(p.demoIntro || 'Short project demos are included below.')}</p>
       </div>
       <div class="demo-grid">
         ${p.videos.map((video, index) => `
@@ -75,8 +75,9 @@
     </section>` : '';
 
   const sourceLinks = [
-    p.github ? `<a href="${escapeHTML(p.github)}" target="_blank" rel="noreferrer">Repository <span>GitHub ↗</span></a>` : '',
-    ...(p.videos || []).map(video => `<a href="${escapeHTML(video.src)}" target="_blank" rel="noreferrer">${escapeHTML(video.label)} <span>Open MP4 ↗</span></a>`)
+    p.github ? `<a href="${escapeHTML(p.github)}" target="_blank" rel="noreferrer"><span><strong>Repository</strong><small>Current project branch</small></span><em>GitHub ↗</em></a>` : '',
+    ...(p.links || []).filter(link => link?.url && link.url !== p.github).map(link => `<a href="${escapeHTML(link.url)}" target="_blank" rel="noreferrer"><span><strong>${escapeHTML(link.label || 'Project link')}</strong><small>${escapeHTML(link.meta || '')}</small></span><em>Open ↗</em></a>`),
+    ...(p.videos || []).map(video => `<a href="${escapeHTML(video.src)}" target="_blank" rel="noreferrer"><span><strong>${escapeHTML(video.label)}</strong><small>${escapeHTML(video.duration || 'MP4')}</small></span><em>Open MP4 ↗</em></a>`)
   ].filter(Boolean).join('');
 
   const githubHref = p.github || 'https://github.com/pateldhruv1672';

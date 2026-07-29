@@ -1335,3 +1335,29 @@ body.modal-open { overflow: hidden; }
   letter-spacing: .04em;
   text-transform: uppercase;
 }
+
+/* Detailed repository/document links inside project blogs. */
+.source-links a > span {
+  display: grid;
+  gap: 4px;
+}
+.source-links a strong {
+  font-size: 14px;
+  font-weight: 700;
+  color: inherit;
+}
+.source-links a small {
+  color: #88888e;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.4;
+}
+.source-links a em {
+  align-self: center;
+  color: #737379;
+  font-size: 11px;
+  font-style: normal;
+  white-space: nowrap;
+}
+.source-links a:hover small,
+.source-links a:hover em { color: inherit; }

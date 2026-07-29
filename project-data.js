@@ -11,150 +11,233 @@ window.PROJECT_ORDER = [
 
 window.PROJECTS = {
   "go2": {
-    "title": "Persistent Semantic Navigation for Unitree Go2",
-    "short": "A ROS 2 workspace for mapping a building, saving named places with the map, and bringing a Unitree Go2 back into the same session for later Nav2 runs.",
+    "title": "Sparky: Persistent Navigation and Agentic Supervision for Unitree Go2",
+    "short": "A ROS 2 Jazzy workspace that separates robot bring-up, mapping, saved-map localization, semantic memory, Nav2 execution, agent supervision, and confirmation-gated voice commands.",
     "image": "assets/images/go2-navigation-poster.jpg",
     "category": "Embodied AI · Autonomous Robotics",
     "year": "2025–Present",
-    "role": "Research assistant · System architect",
-    "readingTime": "11 min read",
-    "github": "https://github.com/pateldhruv1672/go2_ros",
+    "role": "Research assistant · Robotics systems engineer",
+    "readingTime": "15 min read",
+    "github": "https://github.com/pateldhruv1672/go2_ros/tree/teach_repair",
+    "demoIntro": "Four short clips show the runtime/map view, two indoor navigation passes, and the motion-skills controller. Every Go2 clip keeps the original stereo audio.",
+    "links": [
+      {
+        "label": "teach_repair branch",
+        "url": "https://github.com/pateldhruv1672/go2_ros/tree/teach_repair",
+        "meta": "Current implementation"
+      },
+      {
+        "label": "Architecture diagrams",
+        "url": "https://github.com/pateldhruv1672/go2_ros/blob/teach_repair/docs/ARCHITECTURE.md",
+        "meta": "docs/ARCHITECTURE.md"
+      },
+      {
+        "label": "Launch ownership contract",
+        "url": "https://github.com/pateldhruv1672/go2_ros/blob/teach_repair/CURRENT_LAUNCH_CONTRACT.md",
+        "meta": "Base, teach, and resume ownership"
+      },
+      {
+        "label": "Session format",
+        "url": "https://github.com/pateldhruv1672/go2_ros/blob/teach_repair/SESSION_FORMAT_V1.md",
+        "meta": "Persistent map and semantic artifacts"
+      },
+      {
+        "label": "TF, odometry, and topic contract",
+        "url": "https://github.com/pateldhruv1672/go2_ros/blob/teach_repair/TOPIC_TF_ODOM_CONTRACT.md",
+        "meta": "Runtime frame and topic ownership"
+      },
+      {
+        "label": "Implementation validation",
+        "url": "https://github.com/pateldhruv1672/go2_ros/blob/teach_repair/IMPLEMENTATION_VALIDATION.md",
+        "meta": "Validation and known gaps"
+      },
+      {
+        "label": "LangGraph capability status",
+        "url": "https://github.com/pateldhruv1672/go2_ros/blob/teach_repair/LANGGRAPH_CAPABILITY_STATUS.md",
+        "meta": "Implemented vs. planned agent behavior"
+      }
+    ],
     "stack": [
       "ROS 2 Jazzy",
+      "Unitree Go2 WebRTC",
+      "CycloneDDS",
       "Nav2",
       "SLAM Toolbox",
-      "Cartographer",
       "AMCL",
       "LangGraph",
-      "OpenRouter VLM",
+      "OpenRouter",
+      "Gemini 2.5 Flash",
       "Python",
-      "C++",
-      "Unitree SDK"
+      "C++"
     ],
     "facts": [
       {
-        "label": "Operating modes",
-        "value": "Base · Teach · Resume"
+        "label": "Runtime layers",
+        "value": "Base · Teach · Resume · Agent · Voice"
       },
       {
-        "label": "Persistent artifacts",
-        "value": "Map · Places · Session metadata"
+        "label": "Saved session",
+        "value": "Map · Places · Metadata · Spawn"
       },
       {
-        "label": "Primary interface",
-        "value": "Nav2 actions + ROS 2 topics"
+        "label": "Motion authority",
+        "value": "Nav2 + collision monitor"
       }
     ],
-    "lead": "I built this because a navigation demo is not very useful if the robot has to remap the space after every restart. The workspace separates robot bring-up, mapping, localization, semantic memory, and agent tools so I can test and debug each layer on its own.",
-    "problem": "The first issue was not language understanding; it was keeping the ROS graph stable. Stale processes, duplicate SLAM or Nav2 launches, and competing map-to-odom publishers could make a run look healthy while localization was already invalid. I needed a teach/resume workflow that saves one complete session and enables motion only after TF, localization, lifecycle nodes, and Nav2 actions are ready.",
+    "lead": "Sparky is the robotics workspace I use to turn a Unitree Go2 from a sensor-connected platform into a repeatable autonomy system. The main engineering problem is not sending one navigation goal; it is preserving ownership of TF, localization, saved state, motion, and recovery across mapping, restart, and agent-driven operation.",
+    "problem": "The early stack could complete isolated demos, but a restart, duplicate launch, stale process, or second map-to-odom publisher could invalidate the robot state without an obvious error. I reorganized the workspace around explicit launch modes and contracts: one layer owns robot and sensor bring-up, one owns mapping, one owns saved-map localization, and higher-level semantic, agent, and voice components are allowed to act only after the navigation layer reports a healthy state.",
     "chapters": [
       {
-        "title": "Stabilizing the ROS graph",
+        "title": "The workspace is a system, not a single ROS package",
         "paragraphs": [
-          "The repository keeps base bring-up separate from the experimental overlays. Base mode starts the driver and sensors. Teach mode adds one SLAM owner. Resume mode adds one localization and Nav2 owner. The semantic and voice packages are launched only after the underlying graph is healthy.",
-          "This separation makes failures easier to localize. A TF problem stays a TF problem instead of appearing later as a failed semantic command or an unexplained Nav2 timeout."
+          "The teach_repair branch contains separate packages for the Unitree driver, semantic navigation, memory, typed navigation tools, perception, LangGraph orchestration, agentic motion skills, semantic voxel memory, remote teleoperation, COLMAP processing, and the Omi voice bridge. That package boundary is intentional: hardware transport, navigation state, semantic reasoning, and human interaction fail in different ways and need to be tested independently.",
+          "The base driver uses the Go2 WebRTC path and publishes a stable ROS 2 surface for the rest of the workspace. CycloneDDS, a fixed ROS domain, and one project environment reduce discovery and Python-environment ambiguity between terminals."
         ],
         "bullets": [
-          "The workspace uses ROS 2 Jazzy, CycloneDDS, a fixed ROS domain, and the project virtual environment.",
-          "Every navigation goal is submitted in the map frame.",
-          "Lifecycle state, action availability, sensor freshness, and TF ownership are checked before semantic commands run."
+          "Core robot topics include camera images, laser scan, odometry, TF, and the final velocity-command interface.",
+          "The repository keeps reusable launch wrappers under scripts/ instead of relying on long ad-hoc terminal commands.",
+          "The same topic contract is intended to be mirrored by simulation so the autonomy layers do not depend on a second API."
         ]
       },
       {
-        "title": "Saving one complete map session",
+        "title": "Base, teach, and resume have different owners",
         "paragraphs": [
-          "Teach mode builds the occupancy map and records named places against that map. Labels can be entered manually or proposed from camera observations, but the saved place always resolves to metric coordinates.",
-          "A session is complete only when the map image, map metadata, place labels, and session metadata have been written together. That gives resume mode one explicit unit of state instead of a loose set of files."
+          "Base mode owns the driver, robot description, sensors, TF, odometry, scan conversion, and RViz. Teach mode adds a single SLAM owner. Resume mode does not restart live SLAM; it loads a saved map, starts AMCL, brings up the no-docking Nav2 stack, and starts the semantic navigation node in resume mode.",
+          "This prevents the most damaging class of navigation bug in the workspace: two nodes competing to publish map to odom. The launch sequence also delays Nav2 until saved-map localization has had time to initialize instead of letting planners start against an incomplete transform tree."
         ],
         "bullets": [
-          "map.yaml and map.pgm store the occupancy map.",
-          "places.yaml stores named locations and map coordinates.",
-          "session.yaml identifies the selected session and supporting metadata.",
-          "A saved spawn reference provides a known starting landmark for recovery."
+          "BASE_MODE=base is the sensor and robot foundation.",
+          "Teach mode runs SLAM and records semantic places against the live map.",
+          "Resume mode uses map_server and AMCL as the saved-map localization path.",
+          "The current resume path retimestamps /scan into /scan_nav for AMCL, costmaps, collision monitoring, and semantic navigation."
         ]
       },
       {
-        "title": "Resuming with one localization owner",
+        "title": "A saved session is the unit of persistent state",
         "paragraphs": [
-          "Resume mode selects a saved session, starts localization against that map, and waits for a valid map-to-odom-to-base transform chain. Nav2 is not treated as ready until the relevant lifecycle nodes and actions are available.",
-          "The launch flow also avoids running SLAM and AMCL as competing map-to-odom publishers. If a session is incomplete, the failure is reported explicitly instead of silently mixing live and saved state."
+          "Teach mode does not save a map and semantic labels as unrelated outputs. A resume-ready session groups map.yaml, map.pgm, places.yaml, and session.yaml under one session directory. A stored spawn reference provides a known semantic and geometric anchor when the robot returns to the space.",
+          "The semantic layer can propose labels from camera observations, but navigation ultimately resolves a name to a metric pose in the selected map. This keeps the human-facing command and the controller-facing goal connected to the same state snapshot."
+        ],
+        "bullets": [
+          "Sessions are stored under ~/.ros/go2_semantic_nav_sessions/.",
+          "Map and place files are written together so resume mode can audit completeness before launching.",
+          "restore_spawn_on_start provides a controlled re-entry path instead of assuming localization is already correct."
         ]
       },
       {
-        "title": "Keeping language above the control layer",
+        "title": "Agentic behavior is an overlay on a healthy Nav2 stack",
         "paragraphs": [
-          "A natural-language request is resolved to a saved place, converted into a geometric goal, and submitted through typed tools. The planner and executor can inspect preconditions, action feedback, and failure state.",
-          "The language model never publishes cmd_vel. Nav2 remains responsible for path planning and execution, while the agent layer selects goals and bounded recovery actions."
+          "The agentic observe/explore launch is started after the base stack is healthy, and motion is disabled first. The current configuration can use an OpenRouter-hosted Gemini 2.5 Flash model for open-vocabulary observations and VLM checkpoints while ROS nodes expose map, odometry, scan, camera, memory, and tool state.",
+          "The agent does not publish velocity commands. It selects bounded tools, inspects preconditions, receives action feedback, and reports status through dedicated stream, status, and speech topics. Nav2 remains the execution authority and the collision monitor can block motion independently of the language layer."
+        ],
+        "bullets": [
+          "Observe-only commands can inspect the current scene and recommend a safe direction without moving the robot.",
+          "Dynamic-obstacle tracking is disabled by default in the documented launch while the base resume stack is stabilized.",
+          "Motion stays disabled until localization, Nav2 lifecycle nodes, action servers, and sensor freshness checks pass."
         ]
       },
       {
-        "title": "What I inspect during a run",
+        "title": "Voice commands are transcript-first and confirmation-gated",
         "paragraphs": [
-          "RViz, topic inspection, lifecycle queries, action feedback, and logs are part of the experiment. I use them to verify map ownership, localization, path generation, controller behavior, and whether the selected semantic session matches the loaded map.",
-          "The same topic contract is being mirrored in simulation so the semantic and agent layers can be tested without maintaining a second set of interfaces."
+          "The Omi integration currently accepts transcript input, routes it through an intent gate, and can produce TTS and tour behavior. Commands that cause motion require confirmation. Stop, halt, freeze, emergency stop, and cancel-navigation phrases bypass the normal confirmation flow and immediately request zero velocity and a navigation stop.",
+          "Tours are data, not hard-coded prompts. The tour router loads a JSON route that references semantic places, narration, and checkpoint metadata. If the route file is missing or resume mode is unavailable, it refuses rather than inventing a destination."
+        ]
+      },
+      {
+        "title": "The branch documents contracts and known gaps",
+        "paragraphs": [
+          "The repository maintains architecture diagrams plus separate documents for the launch contract, session format, TF/odometry/topic ownership, implementation validation, and LangGraph capability status. I use these files as operational contracts: they record which process owns each layer, which artifacts must exist, and which capabilities are implemented versus still experimental.",
+          "The current branch is deliberately conservative. Global live obstacles can be disabled while debugging map-based planning; agentic motion can remain off; and a clean-restart command removes stale driver, SLAM, AMCL, Nav2, RViz, semantic, and voice processes before another run."
+        ]
+      },
+      {
+        "title": "How I validate a run",
+        "paragraphs": [
+          "I check the system from the bottom up: sensor topics and rates, odometry, TF ownership, lifecycle state, NavigateToPose availability, costmap behavior, action feedback, then semantic and voice state. RViz is used as instrumentation rather than decoration; paths, maps, markers, and localization state need to agree with what the physical robot is doing.",
+          "A run is not counted as successful because the robot moved. The loaded session must match the map, localization must remain valid, Nav2 must own motion, the collision monitor must stay healthy, and the recorded logs must make a failure reproducible."
         ]
       }
     ],
     "system": [
-      "The Unitree driver publishes LiDAR, camera, IMU, odometry, joint state, TF, and the velocity-command interface.",
-      "Teach mode runs a single SLAM instance and writes the map and named places into a session directory.",
-      "Resume mode starts localization against the selected map and activates Nav2 only after the transform chain is valid.",
-      "The memory layer resolves a place name to coordinates from the active session.",
-      "Planner and executor nodes call typed Nav2 tools and handle feedback, timeout, and bounded recovery.",
-      "RViz and logs expose maps, paths, markers, lifecycle state, and the evidence needed to reproduce a failure."
+      "The Unitree WebRTC driver publishes LiDAR, camera, IMU, odometry, joint state, TF, and the final velocity-command interface.",
+      "Point-cloud processing produces the /scan contract consumed by SLAM, AMCL, costmaps, collision monitoring, and semantic navigation.",
+      "Teach mode runs one SLAM owner and writes map.yaml, map.pgm, places.yaml, session.yaml, and the spawn reference into one session.",
+      "Resume mode loads the selected map, starts AMCL, validates map-to-odom-to-base, and then activates the Nav2 no-docking stack.",
+      "Memory and perception packages store semantic places, object observations, VLM checkpoints, and higher-level context without taking over control.",
+      "LangGraph-style supervision resolves commands into typed tools, checks readiness, submits Nav2 actions, and handles bounded recovery and reporting.",
+      "The Omi transcript bridge applies intent classification and confirmation rules before forwarding motion or tour commands.",
+      "RViz, lifecycle queries, action feedback, agent streams, voice verification topics, and clean-restart scripts provide the evidence used to debug a run."
     ],
-    "unique": "The key design choice is simple: language can choose a saved goal, but it does not own low-level robot control. TF ownership, session integrity, and Nav2 readiness are checked before the agent layer is allowed to act.",
+    "unique": "The differentiator is ownership. A language model may select a saved place or request a bounded recovery, but it cannot bypass localization, Nav2, confirmation, or collision monitoring. Persistent state and runtime safety are treated as first-class parts of the autonomy architecture.",
     "impact": [
-      "Split the workspace into base, teach, and resume modes so SLAM and localization do not compete for map-to-odom.",
-      "Saved map.yaml, map.pgm, places.yaml, and session.yaml as one reusable navigation session.",
-      "Reloaded semantic places with the selected map instead of storing labels separately from metric state.",
-      "Defined a shared real/simulation topic contract for later navigation and recovery experiments."
+      "Separated base, teach, resume, agentic, and voice launch layers so failures can be isolated instead of hidden inside one monolithic launch.",
+      "Defined a resume-ready session containing the occupancy map, semantic places, session metadata, and a spawn anchor.",
+      "Made AMCL the saved-map localization owner and prevented live SLAM from competing for map-to-odom during resume runs.",
+      "Added typed Nav2 tools, observe-only agent operation, action feedback, bounded recovery, and motion-disabled startup for safe integration testing.",
+      "Added transcript-first voice commands, explicit confirmation for motion, immediate stop handling, and JSON-backed semantic tour routes.",
+      "Documented architecture, launch ownership, session format, TF/topic contracts, validation status, and LangGraph capability boundaries in the repository."
     ],
     "gallery": [
       {
+        "src": "assets/images/go2-system-architecture.svg",
+        "alt": "Architecture diagram for Sparky Go2 base, teach, resume, semantic, agent, voice, and Nav2 layers",
+        "caption": "System architecture derived from the teach_repair launch and topic contracts.",
+        "kind": "illustration"
+      },
+      {
+        "src": "assets/images/go2-runtime-map-poster.jpg",
+        "alt": "Runtime terminals and map visualization for the Go2 ROS 2 stack",
+        "caption": "Runtime inspection of logs, map state, and the navigation graph.",
+        "kind": "landscape"
+      },
+      {
         "src": "assets/images/go2-navigation-poster.jpg",
         "alt": "Unitree Go2 traversing the SJSU Robotics and Digital Twin Lab during a navigation run",
-        "caption": "Frame from the autonomous navigation recording.",
+        "caption": "Autonomous indoor navigation on the real Go2 platform.",
         "kind": "landscape"
       },
       {
         "src": "assets/images/go2-motion-poster.jpg",
         "alt": "Unitree Go2 executing a motion skill in the laboratory",
-        "caption": "Frame from the Go2 motion-skills recording.",
+        "caption": "Hardware motion-skill execution in the lab.",
         "kind": "landscape"
       },
       {
         "src": "assets/images/go2-lab.webp",
         "alt": "Unitree G1 and Go2 robots inside the SJSU Robotics and Digital Twin Lab",
-        "caption": "The real hardware environment used for autonomy experiments.",
+        "caption": "The Robotics and Digital Twin Lab hardware environment.",
         "kind": "landscape"
       },
       {
         "src": "assets/images/lab/20260526_203953.webp",
         "alt": "Unitree robots and workstations in the SJSU robotics laboratory",
-        "caption": "Go2, G1, and manipulation platforms share the same research space.",
+        "caption": "Go2, G1, and manipulation platforms in the shared research space.",
         "kind": "landscape"
-      },
-      {
-        "src": "assets/images/lab/20260526_203526.webp",
-        "alt": "Unitree Go2 quadruped in front of laboratory workstations",
-        "caption": "Go2 during lab bring-up and sensor validation.",
-        "kind": "landscape"
-      },
-      {
-        "src": "assets/images/lab/20260526_204036.webp",
-        "alt": "Unitree Go2 and G1 robots in the robotics laboratory",
-        "caption": "Physical AI experiments are validated on real platforms, not only in simulation.",
-        "kind": "portrait"
       }
     ],
     "videos": [
       {
+        "src": "assets/media/go2-runtime-map-highlight.mp4",
+        "poster": "assets/images/go2-runtime-map-poster.jpg",
+        "label": "Runtime and map inspection",
+        "duration": "16 sec",
+        "caption": "The ROS 2 runtime, terminal state, and map view used before the physical run. Original stereo audio is preserved.",
+        "hasAudio": true
+      },
+      {
         "src": "assets/media/go2-navigation-highlight.mp4",
         "poster": "assets/images/go2-navigation-poster.jpg",
-        "label": "Go2 autonomous navigation",
+        "label": "Autonomous navigation pass",
         "duration": "18 sec",
-        "caption": "18-second excerpt from a Go2 navigation run in the lab. The clip includes the original audio.",
+        "caption": "A real Go2 navigation pass across the Digital Twin Lab. Original stereo audio is preserved.",
+        "hasAudio": true
+      },
+      {
+        "src": "assets/media/go2-repeat-run-highlight.mp4",
+        "poster": "assets/images/go2-repeat-run-poster.jpg",
+        "label": "Repeat indoor traversal",
+        "duration": "20 sec",
+        "caption": "A later section of the same recording showing another traversal in the lab. Original stereo audio is preserved.",
         "hasAudio": true
       },
       {
@@ -162,7 +245,7 @@ window.PROJECTS = {
         "poster": "assets/images/go2-motion-poster.jpg",
         "label": "Go2 motion skills",
         "duration": "20 sec",
-        "caption": "20-second hardware excerpt showing Go2 motion behaviors. The clip includes the original audio.",
+        "caption": "Hardware motion behavior from the separate Go2 motion-skills recording. Original stereo audio is preserved.",
         "hasAudio": true
       }
     ]
@@ -636,101 +719,183 @@ window.PROJECTS = {
     "videos": []
   },
   "degree": {
-    "title": "The Last Degree — Labor-Market ETL",
-    "short": "A daily Airflow pipeline that pulls US job listings from Adzuna, cleans and deduplicates them, and loads Snowflake tables used for salary, skill-demand, and education-ROI analysis.",
+    "title": "The Last Degree — Graduate ROI Intelligence System",
+    "short": "A cloud-native, risk-adjusted degree ROI platform that joins university outcomes with live job demand, BLS projections, and WARN layoff signals through Airflow, Snowflake, dbt, React, and a SQL AI agent.",
     "image": "assets/images/last-degree-overview.png",
     "coverFit": "contain",
-    "category": "Data Engineering · Analytics",
+    "category": "Data Engineering · Analytics Engineering · AI",
     "year": "2025",
-    "role": "Data platform engineer",
-    "readingTime": "7 min read",
+    "role": "Team project · Data platform and analytics engineering",
+    "readingTime": "13 min read",
     "github": "https://github.com/pateldhruv1672/THE-LAST-DEGREE",
+    "links": [
+      {
+        "label": "Frontend application repository",
+        "url": "https://github.com/pateldhruv1672/THE-LAST-DEGREE-APP",
+        "meta": "React application"
+      },
+      {
+        "label": "Analytics frontend repository",
+        "url": "https://github.com/pateldhruv1672/ai-data-insights",
+        "meta": "Dashboard and data-insight interface"
+      },
+      {
+        "label": "Live application",
+        "url": "https://thelastdegree.dev/",
+        "meta": "Graduate ROI intelligence experience"
+      },
+      {
+        "label": "Technical report",
+        "url": "assets/docs/the-graduate-roi-intelligence-system.pdf",
+        "meta": "26-page architecture and implementation report"
+      }
+    ],
     "stack": [
       "Apache Airflow",
       "Snowflake",
       "dbt",
-      "Adzuna API",
+      "React",
+      "Apache Superset",
       "Python",
       "SQL",
-      "Docker"
+      "Docker",
+      "College Scorecard API",
+      "Adzuna API",
+      "BLS data",
+      "WARN notices"
     ],
     "facts": [
       {
-        "label": "Source",
-        "value": "Adzuna job listings API"
+        "label": "Data pillars",
+        "value": "College · Jobs · BLS · WARN"
       },
       {
-        "label": "Target scale",
-        "value": "~1M active US listings"
+        "label": "Daily job ingestion",
+        "value": "~22,500 listings per run"
       },
       {
-        "label": "Schedule",
-        "value": "Daily · 2 AM UTC"
+        "label": "Shared taxonomy",
+        "value": "25 occupation groups"
       }
     ],
-    "lead": "I wanted the education-ROI analysis to start from a repeatable labor-market dataset rather than a one-time CSV. The linked repository focuses on the ETL layer; the screenshots show the dashboard built on top of that data model.",
-    "problem": "The source API is paginated and rate-limited, and its records contain HTML, missing salaries, inconsistent locations, duplicate postings, and dates that need validation. Those issues have to be handled before a dashboard or forecasting model can be trusted.",
+    "lead": "The Last Degree is a graduate-program decision system built around a simple limitation of conventional ROI rankings: tuition and historical earnings do not describe what the labor market looks like now. The project combines education outcomes with current hiring demand, long-term employment projections, and layoff activity, then materializes those signals into a queryable degree-and-industry outlook mart.",
+    "problem": "The required data arrives from four unrelated domains and cannot be joined directly. College Scorecard describes institutions, Adzuna describes individual job postings, BLS publishes occupational projections, and WARN notices describe layoffs. The engineering challenge was to build a governed pipeline that could ingest each source at its own cadence, normalize the data, map labor-market records into one occupation taxonomy, and expose a risk-adjusted ROI model without burying the business logic inside the frontend.",
     "chapters": [
       {
-        "title": "Extraction handles the external API explicitly",
+        "title": "Four data sources contribute different parts of the decision",
         "paragraphs": [
-          "The Airflow task fetches Adzuna pages, reads credentials from configuration, respects a configurable page limit, and keeps the fields needed downstream: title, employer, salary range, description, posting date, location, and category.",
-          "Pagination and rate limits are treated as normal pipeline conditions rather than hidden inside a single script."
+          "College Scorecard provides the financial baseline: net price, student debt, completion measures, and earnings after entry. Adzuna supplies the live market signal through current job postings, salary ranges, locations, employers, categories, and descriptions. BLS adds a forward-looking view through employment levels and ten-year projections. WARN notices contribute the negative signal by recording mass layoffs and affected-worker counts.",
+          "The sources run at different cadences. Job listings are ingested daily, BLS and WARN data are refreshed monthly, and institutional outcomes change more slowly. Keeping those schedules independent avoids treating every source as if it had the same freshness or reliability contract."
+        ],
+        "bullets": [
+          "College Scorecard: cost, debt, completion, and long-horizon earnings.",
+          "Adzuna: approximately 22,500 listings per daily run across about 30 categories.",
+          "BLS: roughly 834 macro occupations expanded into more than 5,000 granular title rows.",
+          "WARN: company, location, layoff date, and affected-worker records used as a stability signal."
         ]
       },
       {
-        "title": "Transformation keeps business definitions stable",
+        "title": "Airflow owns extraction, structural cleanup, and reliable loading",
         "paragraphs": [
-          "The transformation stage removes HTML, normalizes salary fields, parses posting dates, extracts location fields, and removes duplicates. Extraction and transformation are separate so a source change does not silently change an analytical definition."
+          "Apache Airflow is the control plane for the ingestion layer. Each source has a dedicated DAG and explicit task boundaries for setup, extraction, transformation, staging, merge, and quality checks. The pipelines use staging tables followed by MERGE operations so reruns can update existing records instead of blindly appending duplicates.",
+          "Source-specific work stays in the ETL layer. College Scorecard requires nested JSON flattening, pagination, type conversion, and exponential backoff. Adzuna requires HTML removal, salary normalization, location parsing, pagination, and retry handling. BLS requires structural expansion from broad occupations to granular titles. WARN requires validation and numeric conversion of affected-worker counts."
         ]
       },
       {
-        "title": "Snowflake loading is restartable",
+        "title": "Snowflake separates raw ingestion, analytics, and history",
         "paragraphs": [
-          "Records land in staging tables before merge-based upserts into the analytics tables. Load statistics make each run inspectable, while job_id and load_date preserve identity and ingestion context.",
-          "SQL and dbt models expose skill demand, salary trends, company hiring, category distribution, and geography for the dashboard and later ROI analysis."
+          "Snowflake is organized around distinct responsibilities rather than one catch-all schema. RAW tables preserve the normalized source records, ANALYTICS contains staging views and marts used by the application, and SNAPSHOTS retains historical model state. This separation makes it possible to inspect what arrived from a source independently from the business logic applied later.",
+          "The source tables include COLLEGE_SCORECARD_DATA, JOB_LISTINGS, BLS_EMPLOYMENT_PROJECTIONS, and WARN_EVENTS. Their keys and timestamps preserve both domain identity and ingestion context for downstream debugging."
         ]
       },
       {
-        "title": "The dashboard uses the warehouse outputs",
+        "title": "dbt is the governed business-logic layer",
         "paragraphs": [
-          "The supplied screenshots show the graduate ROI overview and the WARN Act layoff monitor. They combine job volume, earnings, university comparisons, industry stability, company layoffs, and monthly trends.",
-          "The dashboard is a separate presentation layer; the repository link on this page points to the Airflow and Snowflake pipeline that prepares the data."
+          "dbt models handle the analytical transformations inside Snowflake. Staging models standardize each domain and calculate initial metrics; mart models perform the cross-domain joins, tests, documentation generation, and final materialization. The Airflow dbt DAG runs dependency checks, staging models, the mart, snapshots, tests, and documentation as an ordered workflow.",
+          "This keeps the ROI definitions version-controlled and testable. A source parser can change without silently redefining a metric, and the frontend does not need to reproduce complex joins in application code."
+        ],
+        "bullets": [
+          "stg_institution calculates the financial ROI baseline.",
+          "stg_job_demand aggregates listing volume and salary by occupation group.",
+          "stg_layoff_risk aggregates affected workers by industry and period.",
+          "stg_bls_projections maps granular occupations into the shared taxonomy.",
+          "mart_degree_roi_and_industry_outlook is the query-optimized analytical product."
+        ]
+      },
+      {
+        "title": "A 25-group occupation taxonomy makes the domains joinable",
+        "paragraphs": [
+          "The central modeling problem is that universities, job postings, layoff events, and BLS projections do not share a natural primary key. The project introduces a standardized 25-occupation-group taxonomy as the common language for the three labor-market sources.",
+          "The final mart starts with institution IDs crossed with the occupation groups. Institutional ROI metrics join through UnitID, while demand, layoffs, salaries, and BLS projections join through the occupation taxonomy. The resulting table can answer questions about a school and a career path in the same query."
+        ]
+      },
+      {
+        "title": "The score adjusts financial return with demand and layoff risk",
+        "paragraphs": [
+          "The analytical product is not a single historical earnings ranking. The report defines a Degree ROI Score that combines normalized earnings relative to cost, a weighted demand signal, and a penalty derived from layoff risk. The Layoff Risk Index compares aggregated WARN layoffs with active Adzuna job postings for the same occupation group.",
+          "This design makes the score responsive to conflicting evidence. A field can have high salaries but receive a lower outlook when hiring demand is weak or layoffs are unusually high. BLS projections add a longer-horizon check so current posting volume is not treated as the entire career outlook."
+        ],
+        "bullets": [
+          "ROI Score = normalized earnings / normalized cost × weighted demand × (1 - layoff risk).",
+          "Layoff Risk Index = aggregated WARN layoffs / aggregated Adzuna job postings.",
+          "The final table is materialized for low-latency dashboard and agent queries."
+        ]
+      },
+      {
+        "title": "The product layer serves dashboards and natural-language analysis",
+        "paragraphs": [
+          "The React application presents graduate ROI, active jobs, layoff risk, university comparisons, industry stability, and monthly trends. Superset provides additional analytical views such as institution ROI rankings, in-state versus out-of-state comparisons, employment mix, layoff share, and projected growth.",
+          "A SQL AI agent sits above the analytical mart so non-technical users can ask questions in natural language. The agent is valuable because the mart already centralizes the semantics; it queries a governed model rather than generating SQL against unrelated raw tables."
         ]
       }
     ],
     "system": [
-      "Airflow schedules extraction, transformation, and loading as separate retryable tasks.",
-      "The extractor handles Adzuna pagination, credentials, rate limits, and field selection.",
-      "The transformer cleans descriptions, normalizes salary, validates dates, parses location, and deduplicates records.",
-      "Snowflake staging tables isolate incoming data before merge-based upserts.",
-      "SQL and dbt models expose salary, skill, company, location, and category views for analysis."
+      "Airflow schedules independent College Scorecard, Adzuna, BLS, and WARN ingestion workflows.",
+      "Source-specific ETL flattens JSON, cleans HTML, normalizes salaries and locations, expands occupational rows, and validates layoff counts.",
+      "Snowflake RAW tables receive staged records through restartable MERGE operations.",
+      "dbt staging models standardize each domain and calculate initial financial, demand, projection, and risk metrics.",
+      "A 25-occupation-group taxonomy provides the shared dimension across job listings, projections, and layoff events.",
+      "mart_degree_roi_and_industry_outlook cross-joins institutions with occupation groups and materializes the final risk-adjusted analytical model.",
+      "React, Superset, and the SQL AI agent consume the mart for dashboards and natural-language analysis."
     ],
-    "unique": "The dashboard is backed by a scheduled, restartable ingestion path. The project keeps source cleanup, warehouse loading, and analytical definitions visible instead of hiding them inside the UI.",
+    "unique": "The distinguishing decision is to treat degree ROI as a governed, cross-domain data product rather than a frontend formula. Historical education outcomes, live job velocity, ten-year employment projections, and WARN layoffs are normalized separately, joined through an explicit occupation taxonomy, and materialized into one auditable mart.",
     "impact": [
-      "Designed daily ingestion for the Adzuna source, which reports roughly one million active US listings.",
-      "Made job data queryable by skill, employer, category, geography, salary, and time.",
-      "Built the Snowflake foundation used by the ROI and layoff-monitor dashboards.",
-      "Documented the schema, Airflow setup, pipeline components, and operating steps in the repository."
+      "Automated four heterogeneous data pipelines with source-specific schedules, retries, staging, MERGE loading, and data-quality checks.",
+      "Processed approximately 22,500 active job listings per daily Adzuna run and expanded BLS source data into more than 5,000 granular occupation rows.",
+      "Created a shared 25-group occupation taxonomy that connects demand, projection, and layoff signals to institution-level ROI metrics.",
+      "Materialized a risk-adjusted degree-and-industry outlook mart used by dashboards, the React application, and a natural-language SQL agent.",
+      "Documented the full architecture, raw schemas, dbt lineage, dashboard outputs, score logic, and future roadmap in a 26-page technical report."
     ],
     "gallery": [
       {
         "src": "assets/images/last-degree-overview.png",
         "alt": "The Last Degree graduate ROI intelligence dashboard",
-        "caption": "Graduate ROI overview combining earnings, job volume, layoff risk, and university comparisons.",
+        "caption": "The product overview combines ten-year earnings, active jobs, layoff risk, university coverage, job trends, and ROI comparisons.",
         "kind": "landscape"
       },
       {
         "src": "assets/images/last-degree-layoff.png",
-        "alt": "The Last Degree layoff risk monitor dashboard",
-        "caption": "WARN Act monitoring, industry stability scores, company layoff counts, and monthly trends.",
+        "alt": "The Last Degree WARN layoff risk monitor",
+        "caption": "The layoff monitor compares affected workers, sector stability, company-level WARN activity, and monthly trends.",
         "kind": "landscape"
       },
       {
-        "src": "assets/images/last-degree.svg",
-        "alt": "Airflow to Snowflake labor market pipeline diagram",
-        "caption": "Adzuna extraction, transformation, Snowflake loading, and analytical models.",
-        "kind": "illustration"
+        "src": "assets/images/last-degree-architecture.webp",
+        "alt": "The Last Degree end-to-end platform architecture",
+        "caption": "College Scorecard, WARN, BLS, and Adzuna flow through Airflow and staging tables into an analytical mart consumed by Superset, the web app, and the AI agent.",
+        "kind": "landscape"
+      },
+      {
+        "src": "assets/images/last-degree-dbt-dag.webp",
+        "alt": "Airflow DAG for the dbt transformation workflow",
+        "caption": "The dbt workflow runs dependency checks, staging models, the final mart, snapshots, tests, and documentation generation.",
+        "kind": "landscape"
+      },
+      {
+        "src": "assets/images/last-degree-lineage.webp",
+        "alt": "Snowflake and dbt lineage for The Last Degree",
+        "caption": "Raw source tables and lookup tables feed domain staging models before converging in the final degree ROI and industry outlook mart.",
+        "kind": "landscape"
       }
     ],
     "videos": []
