@@ -239,14 +239,7 @@ window.PROJECTS = {
       }
     ],
     "videos": [
-      {
-        "src": "assets/media/go2-runtime-map-highlight.mp4",
-        "poster": "assets/images/go2-runtime-map-poster.jpg",
-        "label": "Navigation substrate: runtime and map",
-        "duration": "16 sec",
-        "caption": "Runtime evidence for map, localization, ROS 2 process state, and navigation readiness before the physical run.",
-        "hasAudio": true
-      },
+      
       {
         "src": "assets/media/go2-navigation-highlight.mp4",
         "poster": "assets/images/go2-navigation-poster.jpg",
