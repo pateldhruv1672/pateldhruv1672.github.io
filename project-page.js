@@ -20,6 +20,11 @@
 
   document.title = `${p.title} — Dhruv Patel`;
   document.querySelector('meta[name="description"]')?.setAttribute('content', p.short);
+  document.querySelector('meta[property="og:title"]')?.setAttribute('content', `${p.title} — Dhruv Patel`);
+  document.querySelector('meta[property="og:description"]')?.setAttribute('content', p.short);
+  document.querySelector('meta[property="og:image"]')?.setAttribute('content', new URL(p.image, location.href).href);
+  document.querySelector('meta[name="twitter:title"]')?.setAttribute('content', `${p.title} — Dhruv Patel`);
+  document.querySelector('meta[name="twitter:description"]')?.setAttribute('content', p.short);
 
   const visualCards = (compact = false) => gallery.map((visual, index) => `
     <button type="button" class="side-visual-card js-open-image ${escapeHTML(visual.kind || 'project')} ${compact ? 'compact' : ''}"
@@ -51,6 +56,17 @@
       ${p.facts.map(fact => `<div><span>${escapeHTML(fact.label)}</span><strong>${escapeHTML(fact.value)}</strong></div>`).join('')}
     </div>` : '';
 
+  const researchHTML = p.research ? `
+    <section class="blog-section reveal" id="research-frame">
+      <p class="blog-section-label">Research frame</p>
+      <h2>${escapeHTML(p.research.title || 'Research framing.')}</h2>
+      <div class="section-prose">
+        <p><strong>Research question.</strong> ${escapeHTML(p.research.question)}</p>
+        <p><strong>Hypothesis.</strong> ${escapeHTML(p.research.hypothesis)}</p>
+        <p><strong>Method.</strong> ${escapeHTML(p.research.method)}</p>
+        <p><strong>Current status.</strong> ${escapeHTML(p.research.status)}</p>
+      </div>
+    </section>` : '';
   const demoHTML = p.videos?.length ? `
     <section class="blog-section demo-section reveal" id="demo">
       <p class="blog-section-label">Media</p>
@@ -140,10 +156,11 @@
           <div class="rail-inner">
             <p class="rail-title">On this page</p>
             <nav aria-label="Article table of contents">
-              <a href="#overview">Overview</a>
+              ${p.research ? '<a href="#research-frame">Research framing</a>' : ''}
+              <a href="#overview">Problem</a>
               ${(p.chapters || []).map((chapter, index) => `<a href="#chapter-${index + 1}">${escapeHTML(chapter.title)}</a>`).join('')}
               <a href="#engineering">Architecture</a>
-              <a href="#impact">Results</a>
+              <a href="#impact">${escapeHTML(p.resultsLabel || 'Results')}</a>
               ${p.videos?.length ? '<a href="#demo">Video demos</a>' : ''}
             </nav>
             <div class="rail-stack">
@@ -157,6 +174,8 @@
         <main class="article-copy">
           <p class="article-lead reveal">${escapeHTML(p.lead || p.problem)}</p>
 
+          ${researchHTML}
+
           <section class="article-inline-visuals reveal" aria-label="Project media">
             <div class="inline-visuals-heading">
               <p>Images and demos</p>
@@ -167,7 +186,7 @@
 
           <section class="blog-section reveal" id="overview">
             <p class="blog-section-label">01</p>
-            <h2>Problem.</h2>
+            <h2>${escapeHTML(p.problemTitle || 'Problem.')}</h2>
             <div class="section-prose"><p>${escapeHTML(p.problem)}</p></div>
           </section>
 
@@ -187,8 +206,8 @@
           </section>
 
           <section class="blog-section reveal" id="impact">
-            <p class="blog-section-label">Results</p>
-            <h2>What I completed.</h2>
+            <p class="blog-section-label">${escapeHTML(p.resultsLabel || 'Results')}</p>
+            <h2>${escapeHTML(p.resultsTitle || 'What I completed.')}</h2>
             <div class="impact-list">
               ${p.impact.map(item => `<div><span aria-hidden="true">↗</span><p>${escapeHTML(item)}</p></div>`).join('')}
             </div>
@@ -198,7 +217,7 @@
 
           <section class="blog-section source-section reveal">
             <p class="blog-section-label">Links</p>
-            <h2>Repository and files.</h2>
+            <h2>Repository, evidence, and implementation notes.</h2>
             <div class="source-links">${sourceLinks || '<p>Supporting code is currently part of a private research workspace.</p>'}</div>
           </section>
         </main>
