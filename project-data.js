@@ -11,15 +11,15 @@ window.PROJECT_ORDER = [
 
 window.PROJECTS = {
   "go2": {
-    "title": "Sparky: Persistent Navigation and Agentic Supervision for Unitree Go2",
-    "short": "A ROS 2 Jazzy workspace that separates robot bring-up, mapping, saved-map localization, semantic memory, Nav2 execution, agent supervision, and confirmation-gated voice commands.",
+    "title": "Sparky: Vision-Language Navigation with Persistent Semantic Memory on Unitree Go2",
+    "short": "A real-robot VLN research system that grounds open-vocabulary visual observations and natural-language goals in persistent semantic memory, then executes through bounded tools and Nav2.",
     "image": "assets/images/go2-navigation-poster.jpg",
-    "category": "Embodied AI · Autonomous Robotics",
+    "category": "Vision-Language Navigation · Embodied Agentic AI",
     "year": "2025–Present",
-    "role": "Research assistant · Robotics systems engineer",
-    "readingTime": "15 min read",
+    "role": "Graduate researcher · Robotics & Agentic AI systems engineer",
+    "readingTime": "18 min read",
     "github": "https://github.com/pateldhruv1672/go2_ros/tree/teach_repair",
-    "demoIntro": "Four short clips show the runtime/map view, two indoor navigation passes, and the motion-skills controller. Every Go2 clip keeps the original stereo audio.",
+    "demoIntro": "These clips provide evidence for the real-robot navigation substrate: runtime inspection, two autonomous traversals, and motion execution. They do not by themselves represent a completed end-to-end VLN benchmark.",
     "links": [
       {
         "label": "teach_repair branch",
@@ -62,6 +62,8 @@ window.PROJECTS = {
       "Unitree Go2 WebRTC",
       "CycloneDDS",
       "Nav2",
+      "Vision-Language Navigation",
+      "Semantic Memory",
       "SLAM Toolbox",
       "AMCL",
       "LangGraph",
@@ -72,110 +74,131 @@ window.PROJECTS = {
     ],
     "facts": [
       {
-        "label": "Runtime layers",
-        "value": "Base · Teach · Resume · Agent · Voice"
+        "label": "Research question",
+        "value": "Language intent → grounded robot goal"
       },
       {
-        "label": "Saved session",
-        "value": "Map · Places · Metadata · Spawn"
+        "label": "Persistent memory",
+        "value": "Map · Places · Objects · Evidence"
       },
       {
-        "label": "Motion authority",
-        "value": "Nav2 + collision monitor"
+        "label": "Safety boundary",
+        "value": "VLM reasons · Nav2 executes"
       }
     ],
-    "lead": "Sparky is the robotics workspace I use to turn a Unitree Go2 from a sensor-connected platform into a repeatable autonomy system. The main engineering problem is not sending one navigation goal; it is preserving ownership of TF, localization, saved state, motion, and recovery across mapping, restart, and agent-driven operation.",
-    "problem": "The early stack could complete isolated demos, but a restart, duplicate launch, stale process, or second map-to-odom publisher could invalidate the robot state without an obvious error. I reorganized the workspace around explicit launch modes and contracts: one layer owns robot and sensor bring-up, one owns mapping, one owns saved-map localization, and higher-level semantic, agent, and voice components are allowed to act only after the navigation layer reports a healthy state.",
+    "lead": "Sparky is my vision-language navigation research system for Unitree Go2. The goal is not to let an LLM drive a robot. The goal is to connect open-vocabulary perception and human spatial intent to a persistent world model, then hand a grounded, auditable goal to a deterministic navigation stack.",
+    "problem": "Most impressive language-conditioned robot demos hide three different problems inside one video: perception must recognize what matters, memory must connect that observation to a stable place, and navigation must still work after the process or robot restarts. On real hardware, stale TF, competing localization publishers, incomplete saved state, ambiguous language, or an unbounded agent can invalidate the result. I therefore treat reliable localization and explicit system ownership as prerequisites for VLN rather than implementation details.",
     "chapters": [
       {
-        "title": "The workspace is a system, not a single ROS package",
+        "title": "The research target: grounded language, not text-to-velocity control",
         "paragraphs": [
-          "The teach_repair branch contains separate packages for the Unitree driver, semantic navigation, memory, typed navigation tools, perception, LangGraph orchestration, agentic motion skills, semantic voxel memory, remote teleoperation, COLMAP processing, and the Omi voice bridge. That package boundary is intentional: hardware transport, navigation state, semantic reasoning, and human interaction fail in different ways and need to be tested independently.",
-          "The base driver uses the Go2 WebRTC path and publishes a stable ROS 2 surface for the rest of the workspace. CycloneDDS, a fixed ROS domain, and one project environment reduce discovery and Python-environment ambiguity between terminals."
+          "The input may be a command such as ‘go to the workbench near the red chair’ or ‘find the printer we saw earlier.’ The output cannot be free-form motion. The system must produce a grounded target with evidence: which observation or saved place matched, where it lies in the active map, how confident the match is, and whether navigation preconditions are healthy.",
+          "This separates semantic success from motion success. A robot can reach the wrong place perfectly, or identify the right object while failing to localize. Treating grounding and execution as separate stages makes those failures measurable."
         ],
         "bullets": [
-          "Core robot topics include camera images, laser scan, odometry, TF, and the final velocity-command interface.",
-          "The repository keeps reusable launch wrappers under scripts/ instead of relying on long ad-hoc terminal commands.",
-          "The same topic contract is intended to be mirrored by simulation so the autonomy layers do not depend on a second API."
+          "VLM output is interpreted as an observation or candidate goal, never a velocity command.",
+          "Ambiguous goals should trigger clarification or additional observation instead of confident motion.",
+          "Every accepted target should be traceable to a map, pose, timestamp, evidence frame, and semantic record."
         ]
       },
       {
-        "title": "Base, teach, and resume have different owners",
+        "title": "A reliable navigation substrate comes before the language layer",
         "paragraphs": [
-          "Base mode owns the driver, robot description, sensors, TF, odometry, scan conversion, and RViz. Teach mode adds a single SLAM owner. Resume mode does not restart live SLAM; it loads a saved map, starts AMCL, brings up the no-docking Nav2 stack, and starts the semantic navigation node in resume mode.",
-          "This prevents the most damaging class of navigation bug in the workspace: two nodes competing to publish map to odom. The launch sequence also delays Nav2 until saved-map localization has had time to initialize instead of letting planners start against an incomplete transform tree."
+          "The teach_repair branch separates robot bring-up, mapping, saved-map localization, semantic memory, navigation tools, agent supervision, and voice interaction. Base mode owns hardware transport, sensors, odometry, TF, scan conversion, and the final command interface. Teach mode adds one SLAM owner. Resume mode loads a saved map and makes AMCL the only map-to-odom owner.",
+          "This architecture addresses the highest-cost failure in the original stack: a robot that appears operational while duplicate or stale publishers corrupt its state. The language layer is activated only after sensor freshness, TF continuity, localization, lifecycle state, and NavigateToPose availability pass readiness checks."
         ],
         "bullets": [
-          "BASE_MODE=base is the sensor and robot foundation.",
-          "Teach mode runs SLAM and records semantic places against the live map.",
-          "Resume mode uses map_server and AMCL as the saved-map localization path.",
-          "The current resume path retimestamps /scan into /scan_nav for AMCL, costmaps, collision monitoring, and semantic navigation."
+          "One process owns each transform and motion interface.",
+          "Nav2 starts after localization rather than racing an incomplete transform tree.",
+          "Clean-restart tooling removes stale driver, SLAM, AMCL, Nav2, RViz, semantic, and voice processes before a new run."
         ]
       },
       {
-        "title": "A saved session is the unit of persistent state",
+        "title": "Teach/resume sessions make spatial memory persistent",
         "paragraphs": [
-          "Teach mode does not save a map and semantic labels as unrelated outputs. A resume-ready session groups map.yaml, map.pgm, places.yaml, and session.yaml under one session directory. A stored spawn reference provides a known semantic and geometric anchor when the robot returns to the space.",
-          "The semantic layer can propose labels from camera observations, but navigation ultimately resolves a name to a metric pose in the selected map. This keeps the human-facing command and the controller-facing goal connected to the same state snapshot."
+          "A VLN system needs more than an occupancy grid. During teach mode, I store the map, semantic places, session metadata, and a spawn reference as one versioned session. Resume mode audits that bundle, loads the selected map, restores the localization path, and only then exposes semantic navigation.",
+          "The session is the consistency boundary between human language and robot geometry. A label such as ‘electronics bench’ is useful only when it resolves to a pose in the same map and coordinate frame used by the planner."
         ],
         "bullets": [
-          "Sessions are stored under ~/.ros/go2_semantic_nav_sessions/.",
-          "Map and place files are written together so resume mode can audit completeness before launching.",
-          "restore_spawn_on_start provides a controlled re-entry path instead of assuming localization is already correct."
+          "Session artifacts include map.yaml, map.pgm, places.yaml, session.yaml, and the spawn anchor.",
+          "Semantic records remain tied to the map in which they were observed.",
+          "The design supports future versioning of object observations, embeddings, evidence frames, and confidence."
         ]
       },
       {
-        "title": "Agentic behavior is an overlay on a healthy Nav2 stack",
+        "title": "From camera frames to structured semantic observations",
         "paragraphs": [
-          "The agentic observe/explore launch is started after the base stack is healthy, and motion is disabled first. The current configuration can use an OpenRouter-hosted Gemini 2.5 Flash model for open-vocabulary observations and VLM checkpoints while ROS nodes expose map, odometry, scan, camera, memory, and tool state.",
-          "The agent does not publish velocity commands. It selects bounded tools, inspects preconditions, receives action feedback, and reports status through dedicated stream, status, and speech topics. Nav2 remains the execution authority and the collision monitor can block motion independently of the language layer."
+          "The perception layer uses camera observations and a vision-language model to generate open-vocabulary descriptions or candidate entities. The important engineering step is converting that text into structured memory rather than appending prose to a chat history.",
+          "A useful object observation should carry a normalized label, attributes, robot pose, estimated map location, timestamp, confidence, source image, and model provenance. Multiple observations can then be fused, rejected, or re-observed instead of treated as equally true."
         ],
         "bullets": [
-          "Observe-only commands can inspect the current scene and recommend a safe direction without moving the robot.",
-          "Dynamic-obstacle tracking is disabled by default in the documented launch while the base resume stack is stabilized.",
-          "Motion stays disabled until localization, Nav2 lifecycle nodes, action servers, and sensor freshness checks pass."
+          "Separate raw VLM output from normalized semantic entities.",
+          "Retain evidence and provenance so incorrect labels can be inspected.",
+          "Use confidence and recency to decide whether to navigate, clarify, or observe again."
         ]
       },
       {
-        "title": "Voice commands are transcript-first and confirmation-gated",
+        "title": "Language goals are resolved against memory before planning",
         "paragraphs": [
-          "The Omi integration currently accepts transcript input, routes it through an intent gate, and can produce TTS and tour behavior. Commands that cause motion require confirmation. Stop, halt, freeze, emergency stop, and cancel-navigation phrases bypass the normal confirmation flow and immediately request zero velocity and a navigation stop.",
-          "Tours are data, not hard-coded prompts. The tour router loads a JSON route that references semantic places, narration, and checkpoint metadata. If the route file is missing or resume mode is unavailable, it refuses rather than inventing a destination."
+          "The agent receives a human goal, queries saved places and object observations, and ranks candidate targets. A successful resolution returns a typed target such as a saved pose or a bounded search region. The resolver can reject the command when the selected map is wrong, evidence is stale, candidates conflict, or the requested entity has never been observed.",
+          "This is where vision-language navigation becomes a research problem rather than a voice-controlled waypoint demo: the system must reason over incomplete and potentially incorrect semantic memory while preserving a clear path back to metric geometry."
+        ],
+        "bullets": [
+          "Known-place navigation resolves directly to a saved metric pose.",
+          "Object-goal navigation starts from the best grounded observation or a bounded search policy.",
+          "The interface exposes why a target was selected and which alternatives were rejected."
         ]
       },
       {
-        "title": "The branch documents contracts and known gaps",
+        "title": "Agentic AI plans with tools; Nav2 retains motion authority",
         "paragraphs": [
-          "The repository maintains architecture diagrams plus separate documents for the launch contract, session format, TF/odometry/topic ownership, implementation validation, and LangGraph capability status. I use these files as operational contracts: they record which process owns each layer, which artifacts must exist, and which capabilities are implemented versus still experimental.",
-          "The current branch is deliberately conservative. Global live obstacles can be disabled while debugging map-based planning; agentic motion can remain off; and a clean-restart command removes stale driver, SLAM, AMCL, Nav2, RViz, semantic, and voice processes before another run."
+          "LangGraph-style supervision is used as a stateful decision layer over typed tools. It can inspect readiness, query memory, request an observation, submit a navigation goal, monitor feedback, cancel, or invoke a bounded recovery. It cannot publish directly to the robot velocity interface.",
+          "This boundary lets me experiment with Agentic AI while keeping the safety-critical control path deterministic. Nav2, controller limits, collision monitoring, lifecycle state, and explicit confirmation remain independent of the model."
+        ],
+        "bullets": [
+          "Observe-only mode supports perception and reasoning tests without enabling motion.",
+          "Motion starts disabled and requires healthy localization, action servers, sensors, and safety nodes.",
+          "Stop and cancel intents bypass normal deliberation and request an immediate halt."
         ]
       },
       {
-        "title": "How I validate a run",
+        "title": "Evaluation separates grounding, navigation, persistence, and recovery",
         "paragraphs": [
-          "I check the system from the bottom up: sensor topics and rates, odometry, TF ownership, lifecycle state, NavigateToPose availability, costmap behavior, action feedback, then semantic and voice state. RViz is used as instrumentation rather than decoration; paths, maps, markers, and localization state need to agree with what the physical robot is doing.",
-          "A run is not counted as successful because the robot moved. The loaded session must match the map, localization must remain valid, Nav2 must own motion, the collision monitor must stay healthy, and the recorded logs must make a failure reproducible."
+          "A single successful traversal is not a VLN result. I am structuring evaluation around independent failure surfaces: semantic grounding accuracy, target selection, navigation completion, final pose error, relocalization after restart, time to first valid plan, recovery success, and unsafe or unnecessary agent actions.",
+          "The planned comparisons include metric saved-place navigation versus language-conditioned goal resolution; memory-first retrieval versus exploration-first behavior; and VLM-only decisions versus VLM plus persistent semantic memory and tool preconditions."
+        ],
+        "bullets": [
+          "Report repeated real-robot trials, not only selected videos.",
+          "Record the map/session identifier, command, selected evidence, target pose, Nav2 result, recovery trace, and final outcome.",
+          "Publish failures and capability boundaries alongside successful runs."
+        ]
+      },
+      {
+        "title": "Current capability boundary and next milestones",
+        "paragraphs": [
+          "The current branch already demonstrates the reliable substrate: real Go2 bring-up, mapping, saved-map localization, semantic place persistence, Nav2 execution, confirmation-gated voice commands, bounded agent tools, and documented ownership contracts.",
+          "The next research milestones are to finish the object-observation writer, connect structured semantic memory to the memory-first find-object loop, collect repeated VLN trials, and run ablations on grounding, persistence, and recovery. I present these as active work rather than implying that the full benchmark is complete."
         ]
       }
     ],
     "system": [
-      "The Unitree WebRTC driver publishes LiDAR, camera, IMU, odometry, joint state, TF, and the final velocity-command interface.",
-      "Point-cloud processing produces the /scan contract consumed by SLAM, AMCL, costmaps, collision monitoring, and semantic navigation.",
-      "Teach mode runs one SLAM owner and writes map.yaml, map.pgm, places.yaml, session.yaml, and the spawn reference into one session.",
-      "Resume mode loads the selected map, starts AMCL, validates map-to-odom-to-base, and then activates the Nav2 no-docking stack.",
-      "Memory and perception packages store semantic places, object observations, VLM checkpoints, and higher-level context without taking over control.",
-      "LangGraph-style supervision resolves commands into typed tools, checks readiness, submits Nav2 actions, and handles bounded recovery and reporting.",
-      "The Omi transcript bridge applies intent classification and confirmation rules before forwarding motion or tour commands.",
-      "RViz, lifecycle queries, action feedback, agent streams, voice verification topics, and clean-restart scripts provide the evidence used to debug a run."
+      "The Unitree WebRTC driver publishes camera, LiDAR-derived scan, IMU, odometry, joint state, TF, and the final velocity-command interface.",
+      "Base-mode health checks verify sensor freshness, transform ownership, odometry continuity, lifecycle state, and motion safety before higher-level reasoning is enabled.",
+      "Teach mode runs one SLAM owner and saves a versioned session containing the occupancy map, semantic places, metadata, and spawn reference.",
+      "The perception layer converts camera frames into structured open-vocabulary observations with semantic labels, evidence, confidence, time, and pose context.",
+      "Persistent memory indexes saved places and object observations within the active map/session instead of relying on conversational context.",
+      "The language-goal resolver converts user intent into a typed saved pose, grounded object target, bounded search request, or clarification response.",
+      "LangGraph-style supervision checks preconditions and invokes typed observe, navigate, cancel, status, and bounded-recovery tools.",
+      "AMCL and Nav2 own localization and execution; collision monitoring and immediate-stop handling remain independent of the VLM and agent."
     ],
-    "unique": "The differentiator is ownership. A language model may select a saved place or request a bounded recovery, but it cannot bypass localization, Nav2, confirmation, or collision monitoring. Persistent state and runtime safety are treated as first-class parts of the autonomy architecture.",
+    "unique": "The core research choice is to decouple semantic intelligence from motion authority. The VLM can interpret a scene and the agent can select a tool, but every navigation request must resolve to explicit map state, pass runtime preconditions, and execute through Nav2 with independent safety controls.",
     "impact": [
-      "Separated base, teach, resume, agentic, and voice launch layers so failures can be isolated instead of hidden inside one monolithic launch.",
-      "Defined a resume-ready session containing the occupancy map, semantic places, session metadata, and a spawn anchor.",
-      "Made AMCL the saved-map localization owner and prevented live SLAM from competing for map-to-odom during resume runs.",
-      "Added typed Nav2 tools, observe-only agent operation, action feedback, bounded recovery, and motion-disabled startup for safe integration testing.",
-      "Added transcript-first voice commands, explicit confirmation for motion, immediate stop handling, and JSON-backed semantic tour routes.",
-      "Documented architecture, launch ownership, session format, TF/topic contracts, validation status, and LangGraph capability boundaries in the repository."
+      "Implemented separate base, teach, resume, agent, and voice layers with explicit ownership of TF, localization, saved state, and motion.",
+      "Created resume-ready sessions that keep occupancy maps, semantic places, metadata, and a spawn anchor together as one persistent state unit.",
+      "Established AMCL as the saved-map localization owner and prevented live SLAM from competing for map-to-odom during resume operation.",
+      "Added typed Nav2 tools, readiness checks, observe-only operation, action feedback, bounded recovery, and motion-disabled startup for agent integration.",
+      "Validated autonomous navigation and repeat traversal on the physical Unitree Go2; the included clips document the navigation substrate rather than claiming a completed VLN benchmark.",
+      "Documented implemented capabilities, known gaps, launch contracts, topic/TF ownership, session format, and the next VLN evaluation milestones in the repository."
     ],
     "gallery": [
       {
@@ -219,25 +242,25 @@ window.PROJECTS = {
       {
         "src": "assets/media/go2-runtime-map-highlight.mp4",
         "poster": "assets/images/go2-runtime-map-poster.jpg",
-        "label": "Runtime and map inspection",
+        "label": "Navigation substrate: runtime and map",
         "duration": "16 sec",
-        "caption": "The ROS 2 runtime, terminal state, and map view used before the physical run. Original stereo audio is preserved.",
+        "caption": "Runtime evidence for map, localization, ROS 2 process state, and navigation readiness before the physical run.",
         "hasAudio": true
       },
       {
         "src": "assets/media/go2-navigation-highlight.mp4",
         "poster": "assets/images/go2-navigation-poster.jpg",
-        "label": "Autonomous navigation pass",
+        "label": "Real-robot navigation substrate",
         "duration": "18 sec",
-        "caption": "A real Go2 navigation pass across the Digital Twin Lab. Original stereo audio is preserved.",
+        "caption": "A real Go2 traversal demonstrating the metric navigation substrate used beneath the VLN research layer.",
         "hasAudio": true
       },
       {
         "src": "assets/media/go2-repeat-run-highlight.mp4",
         "poster": "assets/images/go2-repeat-run-poster.jpg",
-        "label": "Repeat indoor traversal",
+        "label": "Repeat traversal after system setup",
         "duration": "20 sec",
-        "caption": "A later section of the same recording showing another traversal in the lab. Original stereo audio is preserved.",
+        "caption": "A repeat indoor traversal used as qualitative evidence for repeatable execution. Repeated-trial VLN metrics are still being collected.",
         "hasAudio": true
       },
       {
@@ -245,10 +268,20 @@ window.PROJECTS = {
         "poster": "assets/images/go2-motion-poster.jpg",
         "label": "Go2 motion skills",
         "duration": "20 sec",
-        "caption": "Hardware motion behavior from the separate Go2 motion-skills recording. Original stereo audio is preserved.",
+        "caption": "Hardware motion behavior from the separate Go2 motion-skills recording",
         "hasAudio": true
       }
-    ]
+    ],
+    "research": {
+      "title": "Research framing.",
+      "question": "Can a quadruped use open-vocabulary visual observations and natural-language intent to find and revisit meaningful places across sessions without giving a language model direct control of motion?",
+      "hypothesis": "A decoupled architecture—persistent metric/semantic memory for grounding, a vision-language model for interpretation, typed tools for decisions, and Nav2 for execution—can make vision-language navigation more repeatable, inspectable, and recoverable on real hardware.",
+      "method": "Build a teach/resume substrate first; record visual observations with pose, time, confidence, and source; resolve language goals against semantic memory; execute only validated metric goals; and evaluate grounding, navigation, relocalization, latency, and recovery separately.",
+      "status": "Active research prototype on a real Unitree Go2. Persistent navigation, session storage, semantic places, bounded tools, and safety gates are implemented. Open-vocabulary object memory and end-to-end VLN evaluation are under active development."
+    },
+    "problemTitle": "Why vision-language navigation fails outside a one-shot demo.",
+    "resultsLabel": "Evidence",
+    "resultsTitle": "Implemented foundation and active evaluation."
   },
   "xarm": {
     "title": "xArm Teleoperation, Perception & Demonstration Learning",
